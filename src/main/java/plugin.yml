@@ -1,0 +1,4 @@
+main: Main
+version: 1.0
+name: "InventoryShare"
+api-version: 1.19
