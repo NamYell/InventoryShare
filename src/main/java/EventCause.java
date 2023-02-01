@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
@@ -42,22 +43,37 @@ public class EventCause implements Listener {
     @EventHandler
     public void onInventoryClickWithHotbar(InventoryClickEvent e) {
         Integer i = e.getRawSlot();
-        if (e.getInventory() instanceof CraftingInventory) {
-            if (!(i >= 38 && i <= 42) && !(i >= 0 && i <= 8)) {
-                e.setCancelled(true);
-            }
-        } else if (e.getInventory() instanceof DoubleChestInventory) {
-            if ((!(e.getRawSlot() >= 83 && e.getRawSlot() <= 87)) && e.getRawSlot() > 53) {
-                e.setCancelled(true);
-            }
-        } else if (e.getInventory().getType().toString().equals("CHEST") || e.getInventory().getType().toString().equals("ENDER_CHEST") ||
-                e.getInventory().getType().toString().equals("SHULKER_BOX")) {
-            if ((!(e.getRawSlot() >= 56 && e.getRawSlot() <= 60)) && e.getRawSlot() > 26) {
-                e.setCancelled(true);
+
+        if (e.getRawSlot() != -999) {
+            if (e.getInventory() instanceof CraftingInventory) {
+                if (!(i >= 38 && i <= 42) && !(i >= 0 && i <= 8)) {
+                    e.setCancelled(true);
+                }
+            } else if (e.getInventory() instanceof DoubleChestInventory) {
+                if ((!(e.getRawSlot() >= 83 && e.getRawSlot() <= 87)) && e.getRawSlot() > 53) {
+                    e.setCancelled(true);
+                }
+            } else if (e.getInventory().getType().toString().equals("CHEST") || e.getInventory().getType().toString().equals("ENDER_CHEST") ||
+                    e.getInventory().getType().toString().equals("SHULKER_BOX")) {
+                if ((!(e.getRawSlot() >= 56 && e.getRawSlot() <= 60)) && e.getRawSlot() > 26) {
+                    e.setCancelled(true);
+                }
+            } else if (e.getInventory().getType().toString().equals("ENCHANTING")) {
+                if (!(e.getRawSlot() == 0) && !(e.getRawSlot() == 1) && !((e.getRawSlot() >= 31) && (e.getRawSlot() <= 35))) {
+                    e.setCancelled(true);
+                }
+            } else if (e.getInventory().getType().toString().equals("ANVIL") || e.getInventory().getType().toString().equals("FURNACE")) {
+                if (!(e.getRawSlot() == 0) && !(e.getRawSlot() == 1) && !(e.getRawSlot() == 2) && !((e.getRawSlot() >= 32) && (e.getRawSlot() <= 36))) {
+                    e.setCancelled(true);
+                }
+            } else if (e.getInventory().getType().toString().equals("DISPENSER")) {
+                if (!((e.getRawSlot() >= 0) && (e.getRawSlot() <= 8)) && !((e.getRawSlot() >= 38) && (e.getRawSlot() <= 42))) {
+                    e.setCancelled(true);
+                }
             }
         }
 
-        if (e.getClick().isKeyboardClick()) {
+        if (e.getClick().name().equals("NUMBER_KEY")) {
             e.setCancelled(true);
         }
     }
@@ -70,6 +86,13 @@ public class EventCause implements Listener {
     }
 
     @EventHandler
+    public void onPlaceItem(BlockPlaceEvent e) {
+        if (e.getBlock().getType().equals(Material.BARRIER)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onInventoryPickup(PlayerPickupItemEvent e) {
         new DelayedTask(() -> {
             Bukkit.getPluginManager().callEvent(new InventoryChangeEvent(e.getPlayer(),e.getPlayer().getInventory().getContents()));
@@ -78,6 +101,10 @@ public class EventCause implements Listener {
 
     @EventHandler
     public void onInventoryDrop(PlayerDropItemEvent e) {
+        if (e.getItemDrop().getItemStack().getType().equals(Material.BARRIER)) {
+            e.setCancelled(true);
+        }
+
         new DelayedTask(() -> {
             Bukkit.getPluginManager().callEvent(new InventoryChangeEvent(e.getPlayer(),e.getPlayer().getInventory().getContents()));
         }, 1);
@@ -85,9 +112,7 @@ public class EventCause implements Listener {
 
     @EventHandler
     public void onItemSwap(PlayerSwapHandItemsEvent e) {
-        if (e.getOffHandItem().getType().equals(Material.BARRIER)) {
-            e.setCancelled(true);
-        }
+        e.setCancelled(true);
 
         new DelayedTask(() -> {
             Bukkit.getPluginManager().callEvent(new InventoryChangeEvent(e.getPlayer(),e.getPlayer().getInventory().getContents()));
@@ -124,6 +149,7 @@ public class EventCause implements Listener {
 
         p.getInventory().setItem(0, itemStack);
         p.getInventory().setItem(1, itemStack);
+        p.getInventory().setItem(40, itemStack);
 
         for (int i = 7; i <= 35; i++) {
             p.getInventory().setItem(i, itemStack);
