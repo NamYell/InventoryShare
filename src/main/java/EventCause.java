@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
@@ -79,6 +80,29 @@ public class EventCause implements Listener {
     }
 
     @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent e) {
+
+        new DelayedTask(() -> {
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.getInventory().clear();
+
+                ItemStack itemStack = new ItemStack(Material.BARRIER);
+                ItemMeta itemMeta  = itemStack.getItemMeta();
+                itemMeta.setDisplayName(" ");
+                itemStack.setItemMeta(itemMeta);
+
+                p.getInventory().setItem(0, itemStack);
+                p.getInventory().setItem(1, itemStack);
+                p.getInventory().setItem(40, itemStack);
+
+                for (int i = 7; i <= 35; i++) {
+                    p.getInventory().setItem(i, itemStack);
+                }
+            }
+        }, 1);
+    }
+
+    @EventHandler
     public void onInventoryDrag(InventoryDragEvent e) {
         new DelayedTask(() -> {
             Bukkit.getPluginManager().callEvent(new InventoryChangeEvent((Player) e.getWhoClicked(),e.getWhoClicked().getInventory().getContents()));
@@ -94,6 +118,10 @@ public class EventCause implements Listener {
 
     @EventHandler
     public void onInventoryPickup(PlayerPickupItemEvent e) {
+        if (e.getItem().getItemStack().getType().equals(Material.BARRIER)) {
+            e.setCancelled(true);
+        }
+
         new DelayedTask(() -> {
             Bukkit.getPluginManager().callEvent(new InventoryChangeEvent(e.getPlayer(),e.getPlayer().getInventory().getContents()));
         }, 1);
